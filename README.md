@@ -24,7 +24,7 @@ Still planned:
 ## Quick Install
 
 ```bash
-git clone https://github.com/FrameT-bit/VoLtex voltex
+git clone https://github.com/FrameT-bit/VoLtex
 cd voltex
 ./install
 ```
