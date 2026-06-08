@@ -146,5 +146,3 @@ VOLTEX_LAUNCH_MODE=wine-virtual-desktop VOLTEX_WINE_DESKTOP=Vortex,1280x720 ./ru
 - Logs redact cookies, tokens, passwords, and authorization values.
 - Session tokens readable from JavaScript are stored in the system keyring when login persistence is enabled.
 - Browser session persistence uses GTK WebKit's own storage under `~/.local/share/voltex/webview`.
-
-Important limitation: injected JavaScript cannot read `HttpOnly` cookies. If Vortex stores auth only in `HttpOnly` cookies, VoLtex relies on WebKit's browser session storage rather than copying those cookies into keyring.
