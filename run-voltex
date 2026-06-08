@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+APP_DIR="${VOLTEX_APP_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
+STATE_ROOT="${XDG_STATE_HOME:-$HOME/.local/state}"
+LOG_DIR="$STATE_ROOT/voltex"
+LOG_FILE="$LOG_DIR/launcher.log"
+
+export GDK_BACKEND="${VOLTEX_GDK_BACKEND:-x11}"
+
+mkdir -p "$LOG_DIR"
+chmod 700 "$LOG_DIR" 2>/dev/null || true
+
+show_error() {
+  local message="$1"
+  if command -v zenity >/dev/null 2>&1; then
+    zenity --error --title="VoLtex" --text="$message" 2>/dev/null || true
+  elif command -v kdialog >/dev/null 2>&1; then
+    kdialog --error "$message" --title "VoLtex" 2>/dev/null || true
+  elif command -v notify-send >/dev/null 2>&1; then
+    notify-send "VoLtex" "$message" 2>/dev/null || true
+  fi
+}
+
+if [[ -x "$APP_DIR/.venv/bin/python" ]]; then
+  PYTHON="$APP_DIR/.venv/bin/python"
+else
+  PYTHON="$(command -v python3 || true)"
+fi
+
+if [[ -z "${PYTHON:-}" ]]; then
+  message="Python 3 was not found. Run the VoLtex installer first."
+  echo "$message" >>"$LOG_FILE"
+  show_error "$message"
+  exit 1
+fi
+
+cd "$APP_DIR"
+
+if [[ -t 1 ]]; then
+  exec "$PYTHON" -m voltex.main "$@"
+fi
+
+if ! "$PYTHON" -m voltex.main "$@" >>"$LOG_FILE" 2>&1; then
+  status=$?
+  message="VoLtex could not start. Details were written to $LOG_FILE"
+  echo "$message" >>"$LOG_FILE"
+  show_error "$message"
+  exit "$status"
+fi

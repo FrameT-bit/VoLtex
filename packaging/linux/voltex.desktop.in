@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=VoLtex
+Comment=Play Vortex on Linux
+Exec="@APP_DIR@/run-voltex" %u
+Icon=voltex
+Terminal=false
+Categories=Game;
+StartupNotify=true
+MimeType=x-scheme-handler/vortex;

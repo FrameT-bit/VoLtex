@@ -1,0 +1,17 @@
+[project]
+name = "voltex"
+version = "0.1.0"
+description = "Linux webview launcher bridge for Vortex"
+requires-python = ">=3.11"
+dependencies = [
+  "Flask>=3.0",
+  "pywebview>=5.0",
+  "keyring>=25.0",
+]
+
+[project.scripts]
+voltex = "voltex.main:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
