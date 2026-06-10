@@ -3,19 +3,18 @@ set -euo pipefail
 
 APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PARENT_DIR="$(dirname "$APP_DIR")"
+APP_BASENAME="$(basename "$APP_DIR")"
 STAMP="$(date '+%Y%m%d-%H%M%S')"
-TARGET="$PARENT_DIR/voltex-working-$STAMP.zip"
+TARGET="${1:-$PARENT_DIR/$APP_BASENAME-working-$STAMP.zip}"
 
 cd "$PARENT_DIR"
-zip -r "$TARGET" "$(basename "$APP_DIR")" \
-  -x 'voltex/.venv/bin/*' \
-  -x 'voltex/.venv/lib/*' \
-  -x 'voltex/.venv/lib64/*' \
-  -x 'voltex/.venv/include/*' \
-  -x 'voltex/.venv/share/*' \
+zip -r "$TARGET" "$APP_BASENAME" \
+  -x "$APP_BASENAME/.git/*" \
+  -x "$APP_BASENAME/.venv/*" \
+  -x "$APP_BASENAME/.pytest_cache/*" \
   -x '*/__pycache__/*' \
   -x '*.pyc' \
-  -x 'voltex/.pytest_cache/*'
+  -x '*.zip'
 
 unzip -t "$TARGET" >/dev/null
 printf '%s\n' "$TARGET"

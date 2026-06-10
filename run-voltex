@@ -1,7 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_DIR="${VOLTEX_APP_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
+# Resolve symlinks so the CLI alias (e.g. ~/.local/bin/voltex) finds the
+# real app directory even when called through a symbolic link.
+if command -v realpath >/dev/null 2>&1; then
+  RESOLVED="$(realpath "${BASH_SOURCE[0]}")"
+elif command -v readlink >/dev/null 2>&1 && readlink -f "${BASH_SOURCE[0]}" >/dev/null 2>&1; then
+  RESOLVED="$(readlink -f "${BASH_SOURCE[0]}")"
+else
+  RESOLVED="${BASH_SOURCE[0]}"
+fi
+APP_DIR="${VOLTEX_APP_DIR:-$(cd "$(dirname "$RESOLVED")" && pwd)}"
 STATE_ROOT="${XDG_STATE_HOME:-$HOME/.local/state}"
 LOG_DIR="$STATE_ROOT/voltex"
 LOG_FILE="$LOG_DIR/launcher.log"
@@ -22,17 +31,22 @@ show_error() {
   fi
 }
 
+fail_start() {
+  local message="$1"
+  echo "$message" >>"$LOG_FILE"
+  show_error "$message"
+  printf '%s\n' "$message" >&2
+  exit 1
+}
+
 if [[ -x "$APP_DIR/.venv/bin/python" ]]; then
   PYTHON="$APP_DIR/.venv/bin/python"
 else
-  PYTHON="$(command -v python3 || true)"
+  fail_start "VoLtex is not installed correctly. The Python environment was not found at $APP_DIR/.venv. Run: bash \"$APP_DIR/install\""
 fi
 
-if [[ -z "${PYTHON:-}" ]]; then
-  message="Python 3 was not found. Run the VoLtex installer first."
-  echo "$message" >>"$LOG_FILE"
-  show_error "$message"
-  exit 1
+if ! missing="$("$PYTHON" -c 'import importlib.util; missing = [name for name in ("flask", "webview", "keyring") if importlib.util.find_spec(name) is None]; print(", ".join(missing)); raise SystemExit(1 if missing else 0)' 2>/dev/null)"; then
+  fail_start "VoLtex dependencies are missing from $APP_DIR/.venv. Missing modules: ${missing:-unknown}. Run: bash \"$APP_DIR/install\""
 fi
 
 cd "$APP_DIR"
@@ -41,10 +55,10 @@ if [[ -t 1 ]]; then
   exec "$PYTHON" -m voltex.main "$@"
 fi
 
-if ! "$PYTHON" -m voltex.main "$@" >>"$LOG_FILE" 2>&1; then
+"$PYTHON" -m voltex.main "$@" >>"$LOG_FILE" 2>&1 || {
   status=$?
   message="VoLtex could not start. Details were written to $LOG_FILE"
   echo "$message" >>"$LOG_FILE"
   show_error "$message"
   exit "$status"
-fi
+}

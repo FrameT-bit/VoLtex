@@ -18,6 +18,10 @@ from .game_launcher import GameLauncher, VortexPlayerNotFound, redact_command
 SENSITIVE_FIELDS = {"authorization", "cookie", "password", "session_token", "token"}
 
 
+############################################################
+# LOG REDACTION                                            #
+############################################################
+
 def redact_sensitive(value: Any, field_name: str | None = None) -> Any:
     if field_name is not None and field_name.lower() in SENSITIVE_FIELDS:
         return "[redacted]"
@@ -56,6 +60,10 @@ class BridgeInfo:
         return f"http://{self.host}:{self.port}"
 
 
+############################################################
+# EVENT LOG                                                #
+############################################################
+
 class EventLog:
     def __init__(self, log_file: Path | None = None) -> None:
         self._events: list[dict[str, Any]] = []
@@ -80,6 +88,10 @@ class EventLog:
         with self._lock:
             return list(self._events)
 
+
+############################################################
+# FLASK APPLICATION                                        #
+############################################################
 
 def create_app(
     auth: AuthManager,
@@ -168,6 +180,10 @@ def create_app(
 
     return app
 
+
+############################################################
+# BRIDGE SERVER                                            #
+############################################################
 
 class BridgeServer:
     def __init__(

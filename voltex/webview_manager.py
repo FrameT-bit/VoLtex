@@ -12,6 +12,10 @@ from .config import VoltexConfig
 from .server import BridgeInfo
 
 
+############################################################
+# INJECTED JAVASCRIPT                                      #
+############################################################
+
 SCRIPT_TEMPLATE = Template(
     r"""
 (() => {
@@ -228,6 +232,10 @@ SCRIPT_TEMPLATE = Template(
 )
 
 
+############################################################
+# WEBVIEW LIFECYCLE                                        #
+############################################################
+
 class WebviewManager:
     def __init__(self, config: VoltexConfig, bridge: BridgeInfo) -> None:
         self._config = config
@@ -279,6 +287,10 @@ class WebviewManager:
                         "detail": detail[:800],
                     },
                 )
+
+    ############################################################
+    # NATIVE GTK INTERCEPTOR                                   #
+    ############################################################
 
     def _install_native_interceptor(self, window: object) -> None:
         try:
@@ -337,6 +349,10 @@ class WebviewManager:
                 return browser_view
             time.sleep(0.05)
         return None
+
+    ############################################################
+    # BRIDGE HELPERS                                           #
+    ############################################################
 
     def _post_bridge_async(self, path: str, payload: dict[str, Any]) -> None:
         thread = threading.Thread(target=self._post_bridge, args=(path, payload), daemon=True)

@@ -12,7 +12,7 @@ Do not run the installer with `sudo`. Run it as the normal desktop user. The ins
 
 The installer:
 
-- copies VoLtex to `~/.local/opt/voltex`;
+- copies VoLtex to `~/.local/share/voltex/app`;
 - detects Fedora, Ubuntu/Debian, Arch/Manjaro, openSUSE, and yum-based systems;
 - prints dependency commands and reference links if automatic install cannot complete;
 - creates `.venv` with `--system-site-packages`;
@@ -22,6 +22,12 @@ The installer:
 - writes `~/.local/share/applications/voltex-reset-session.desktop`;
 - creates `~/Desktop/VoLtex.desktop` when the Desktop folder exists;
 - registers `x-scheme-handler/vortex` to VoLtex.
+
+If the downloaded files lost executable permissions, run the same installer through the shell:
+
+```bash
+bash install
+```
 
 To explicitly allow the installer to request admin privileges and install missing system packages, run:
 

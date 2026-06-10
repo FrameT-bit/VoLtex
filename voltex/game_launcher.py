@@ -33,6 +33,10 @@ class LaunchResult:
 ProcessCallback = Callable[[subprocess.Popen[str]], None]
 
 
+############################################################
+# LOG REDACTION                                            #
+############################################################
+
 def redact_log_text(text: str) -> str:
     return re.sub(
         r"(?i)\b(token|session_token|password)=([^&\s]+)",
@@ -44,6 +48,10 @@ def redact_log_text(text: str) -> str:
 def redact_command(command: list[str]) -> list[str]:
     return [redact_log_text(item) for item in command]
 
+
+############################################################
+# VORTEX EXECUTABLE DISCOVERY                              #
+############################################################
 
 def find_vortex_executable(config: VoltexConfig) -> str | None:
     if config.vortex_exe.exists():
@@ -76,6 +84,10 @@ def find_vortex_executable(config: VoltexConfig) -> str | None:
 
     return None
 
+
+############################################################
+# GAME LAUNCHER                                            #
+############################################################
 
 class GameLauncher:
     def __init__(self, config: VoltexConfig) -> None:
