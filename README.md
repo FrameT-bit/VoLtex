@@ -54,6 +54,44 @@ Useful commands:
 ./run-voltex --clear-session
 ```
 
+## Updates
+
+VoLtex checks GitHub for new versions. No need to re-download zip files.
+
+```bash
+# Check for updates (stable branch)
+./run-voltex --check-update
+
+# Install the latest stable update
+./run-voltex --update
+
+# Track the testing branch (pre-releases)
+./run-voltex --check-update --update-branch testing
+./run-voltex --update --update-branch testing
+```
+
+Updates are applied atomically — the previous version is kept as a backup
+(`~/.local/share/voltex/app.old`) and can be restored if needed.
+
+## Branches
+
+| Branch | Purpose |
+|--------|---------|
+| `main` | Stable releases. Safe for everyday use. |
+| `testing` | Pre-release builds. New features land here first. May have rough edges. |
+
+To switch from `main` to `testing`:
+
+```bash
+./run-voltex --update --update-branch testing
+```
+
+To go back to stable:
+
+```bash
+./run-voltex --update --update-branch main
+```
+
 ## Vortex Player Requirement
 
 VoLtex can be installed before the Windows Vortex player, but games will only launch after `Vortex.exe` is installed in your Wine prefix.
