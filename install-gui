@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")" && pwd)"
+ICON="$SCRIPT_DIR/assets/icons/voltex.svg"
+INSTALLER="$SCRIPT_DIR/scripts/install-linux.sh"
+
+############################################################
+# GUI HELPERS                                              #
+############################################################
+
+gui_info()      { zenity --info --icon="$ICON" --width=450 --title="VoLtex Setup" "$@"; }
+gui_question()  { zenity --question --icon="$ICON" --width=450 --title="VoLtex Setup" "$@"; }
+gui_progress()  { zenity --progress --icon="$ICON" --width=450 --title="VoLtex Setup" --auto-close "$@"; }
+gui_list()      { zenity --list --checklist --icon="$ICON" --width=500 --height=320 --title="VoLtex Setup" "$@"; }
+gui_error()     { zenity --error --icon="$ICON" --width=450 --title="VoLtex Setup" --text="$1"; }
+
+gui_welcome() {
+    gui_info \
+        --ok-label="Next" \
+        --text="Welcome to VoLtex Setup\n\nThis will install VoLtex on your system.\n\nVoLtex is a Linux launcher for Vortex."
+}
+
+gui_options() {
+    gui_list \
+        --text="Choose installation options:" \
+        --column="" --column="Option" \
+        TRUE "Desktop shortcut" \
+        TRUE "CLI command (voltex)" \
+        FALSE "Auto-send error logs"
+}
+
+gui_done() {
+    if gui_question --ok-label="Launch" --cancel-label="Close" \
+        --text="VoLtex has been installed.\n\nLaunch now?"; then
+        bash "$SCRIPT_DIR/run-voltex" &
+    fi
+}
+
+############################################################
+# MAIN                                                     #
+############################################################
+
+if [[ "${VOLTEX_NO_GUI:-0}" == "1" ]] || ! command -v zenity >/dev/null 2>&1; then
+    exec bash "$INSTALLER" "$@"
+fi
+
+gui_welcome || exit 0
+
+SELECTED=$(gui_options)
+[[ $? -ne 0 ]] && exit 0
+
+ENABLE_CLI=0
+ENABLE_LOGS=0
+if echo "$SELECTED" | grep -q "CLI command"; then ENABLE_CLI=1; fi
+if echo "$SELECTED" | grep -q "Auto-send error logs"; then ENABLE_LOGS=1; fi
+
+export VOLTEX_ENABLE_CLI=$ENABLE_CLI
+export VOLTEX_ENABLE_ERROR_LOGS=$ENABLE_LOGS
+
+bash "$INSTALLER" --install-system-deps 2>&1 | while IFS= read -r line; do
+    echo "# $line"
+done | gui_progress --pulsate --text="Installing VoLtex..." || {
+    gui_error "Installation failed.\n\nRun: bash install"
+    exit 1
+}
+
+gui_done

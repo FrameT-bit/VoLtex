@@ -385,6 +385,30 @@ install_cli_alias() {
   fi
 }
 
+install_error_log_sender() {
+  local webhook_url="${VOLTEX_WEBHOOK_URL:-}"
+  local config_dir="$CONFIG_HOME/voltex"
+  mkdir -p "$config_dir"
+
+  if [[ -z "$webhook_url" ]]; then
+    warn "VOLTEX_WEBHOOK_URL is not set. Error log sending will not be configured."
+    return
+  fi
+
+  echo "$webhook_url" > "$config_dir/webhook"
+
+  cat > "$INSTALL_DIR/scripts/send-error-log.sh" <<'SENDSCRIPT'
+#!/usr/bin/env bash
+WEBHOOK=$(cat "$HOME/.config/voltex/webhook" 2>/dev/null)
+LOG="$HOME/.local/state/voltex/launcher.log"
+[[ -z "$WEBHOOK" || ! -f "$LOG" ]] && exit 0
+tail -c 8000 "$LOG" | jq -Rs '{content: .}' | curl -s -X POST -H "Content-Type: application/json" -d @- "$WEBHOOK" &
+SENDSCRIPT
+  chmod 755 "$INSTALL_DIR/scripts/send-error-log.sh"
+
+  info "Error log sender configured."
+}
+
 parse_args "$@"
 refuse_root_install
 normalize_install_dir
@@ -394,7 +418,14 @@ normalize_app_permissions
 remove_legacy_default_install
 install_python_environment
 install_desktop_integration
-install_cli_alias
+
+if [[ "${VOLTEX_ENABLE_CLI:-1}" == "1" ]]; then
+  install_cli_alias
+fi
+
+if [[ "${VOLTEX_ENABLE_ERROR_LOGS:-0}" == "1" ]]; then
+  install_error_log_sender
+fi
 
 info "$APP_NAME installed."
 info "App files: $INSTALL_DIR"
