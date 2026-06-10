@@ -385,6 +385,12 @@ install_cli_alias() {
   fi
 }
 
+install_auto_update() {
+  local config_dir="$CONFIG_HOME/voltex"
+  mkdir -p "$config_dir"
+  echo "auto_update=true" > "$config_dir/config"
+}
+
 install_error_log_sender() {
   local webhook_url="${VOLTEX_WEBHOOK_URL:-}"
   local config_dir="$CONFIG_HOME/voltex"
@@ -421,6 +427,10 @@ install_desktop_integration
 
 if [[ "${VOLTEX_ENABLE_CLI:-1}" == "1" ]]; then
   install_cli_alias
+fi
+
+if [[ "${VOLTEX_ENABLE_AUTO_UPDATE:-1}" == "1" ]]; then
+  install_auto_update
 fi
 
 if [[ "${VOLTEX_ENABLE_ERROR_LOGS:-0}" == "1" ]]; then

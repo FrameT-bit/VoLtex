@@ -48,6 +48,37 @@ if ! missing="$("$PYTHON" -c 'import importlib.util; missing = [name for name in
   fail_start "VoLtex: missing dependencies (${missing:-unknown})\nRun: bash \"$APP_DIR/install\""
 fi
 
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}"
+
+check_auto_update() {
+  local config="$CONFIG_DIR/voltex/config"
+  [[ -f "$config" ]] || return
+  grep -q "auto_update=true" "$config" || return
+
+  local result
+  result=$("$PYTHON" -m voltex.main --check-update 2>/dev/null) || true
+  [[ "$result" == *"Update available"* ]] || return
+
+  local choice
+  choice=$(zenity --list --radiolist --title="VoLtex" --width=400 --height=220 \
+    --text="A new version of VoLtex is available.\n\nUpdate now?" \
+    --column="" --column="Action" \
+    TRUE "Update now" \
+    FALSE "Skip this time" \
+    FALSE "Don't ask again" 2>/dev/null) || return
+
+  case "$choice" in
+    "Update now")
+      "$PYTHON" -m voltex.main --update 2>/dev/null
+      ;;
+    "Don't ask again")
+      sed -i '/auto_update=true/d' "$config"
+      ;;
+  esac
+}
+
+check_auto_update
+
 cd "$APP_DIR"
 
 if [[ -t 1 ]]; then
