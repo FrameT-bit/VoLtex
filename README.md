@@ -150,21 +150,6 @@ game.log
 
 Sensitive values such as cookies, tokens, passwords, and authorization headers are redacted from logs.
 
-## Error Reporting
-
-VoLtex can send crash logs to a Discord channel. To enable:
-
-1. Create a webhook in your Discord server (Server Settings → Integrations → Webhooks)
-2. Set the URL before installing:
-
-```bash
-VOLTEX_WEBHOOK_URL="https://discord.com/api/webhooks/..." ./install-gui
-```
-
-Or select "Auto-send error logs" in the GUI installer. The webhook URL is stored in `~/.config/voltex/webhook`.
-
-Logs are trimmed to the last 8KB before sending. No personal data is included — tokens and passwords are already redacted.
-
 ## Troubleshooting
 
 Run:
