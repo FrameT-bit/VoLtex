@@ -9,3 +9,4 @@ tests/
 *.log
 .DS_Store
 Thumbs.db
+.hermes/

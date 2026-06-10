@@ -28,7 +28,7 @@ gui_options() {
         TRUE "Desktop shortcut" \
         TRUE "CLI command (voltex)" \
         TRUE "Auto-update on launch" \
-        FALSE "Auto-send error logs"
+        FALSE "Show crash details"
 }
 
 gui_done() {
@@ -52,14 +52,14 @@ SELECTED=$(gui_options)
 [[ $? -ne 0 ]] && exit 0
 
 ENABLE_CLI=0
-ENABLE_LOGS=0
+ENABLE_CRASH_REPORTS=0
 ENABLE_AUTO_UPDATE=0
 if echo "$SELECTED" | grep -q "CLI command"; then ENABLE_CLI=1; fi
-if echo "$SELECTED" | grep -q "Auto-send error logs"; then ENABLE_LOGS=1; fi
+if echo "$SELECTED" | grep -q "Show crash details"; then ENABLE_CRASH_REPORTS=1; fi
 if echo "$SELECTED" | grep -q "Auto-update on launch"; then ENABLE_AUTO_UPDATE=1; fi
 
 export VOLTEX_ENABLE_CLI=$ENABLE_CLI
-export VOLTEX_ENABLE_ERROR_LOGS=$ENABLE_LOGS
+export VOLTEX_ENABLE_CRASH_REPORTS=$ENABLE_CRASH_REPORTS
 export VOLTEX_ENABLE_AUTO_UPDATE=$ENABLE_AUTO_UPDATE
 
 bash "$INSTALLER" --install-system-deps 2>&1 | while IFS= read -r line; do

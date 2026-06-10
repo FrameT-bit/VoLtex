@@ -29,12 +29,24 @@ show_error() {
   fi
 }
 
+crash_dialog() {
+  if ! command -v zenity >/dev/null 2>&1; then
+    return
+  fi
+  local msg="VoLtex encountered an error.\n\nDetails: $LOG_FILE"
+  if zenity --question --title="VoLtex" --width=400 \
+    --text="$msg" \
+    --ok-label="Report Issue" --cancel-label="Close" 2>/dev/null; then
+    xdg-open "https://github.com/FrameT-bit/VoLtex/issues/new" &
+  fi
+}
+
 fail_start() {
   local message="$1"
   echo "$message" >>"$LOG_FILE"
   show_error "$message"
   printf '%s\n' "$message" >&2
-  [[ -x "$APP_DIR/scripts/send-error-log.sh" ]] && bash "$APP_DIR/scripts/send-error-log.sh" &
+  crash_dialog &
   exit 1
 }
 
@@ -83,6 +95,6 @@ fi
   message="VoLtex could not start. Details were written to $LOG_FILE"
   echo "$message" >>"$LOG_FILE"
   show_error "$message"
-  [[ -x "$APP_DIR/scripts/send-error-log.sh" ]] && bash "$APP_DIR/scripts/send-error-log.sh" &
+  crash_dialog &
   exit "$status"
 }

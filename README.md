@@ -150,6 +150,16 @@ game.log
 
 Sensitive values such as cookies, tokens, passwords, and authorization headers are redacted from logs.
 
+## Error Reporting
+
+When VoLtex crashes, a dialog appears with two options:
+
+- **Close** — dismiss the dialog
+- **Report Issue** — opens the GitHub Issues page
+
+Crash logs are stored in `~/.local/state/voltex/launcher.log`.
+No data is ever sent automatically.
+
 ## Troubleshooting
 
 Run:
