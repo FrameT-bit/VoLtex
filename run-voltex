@@ -59,22 +59,15 @@ check_auto_update() {
   result=$("$PYTHON" -m voltex.main --check-update 2>/dev/null) || true
   [[ "$result" == *"Update available"* ]] || return
 
-  local choice
-  choice=$(zenity --list --radiolist --title="VoLtex" --width=400 --height=220 \
+  if zenity --question --title="VoLtex" --width=350 \
     --text="A new version of VoLtex is available.\n\nUpdate now?" \
-    --column="" --column="Action" \
-    TRUE "Update now" \
-    FALSE "Skip this time" \
-    FALSE "Don't ask again" 2>/dev/null) || return
-
-  case "$choice" in
-    "Update now")
-      "$PYTHON" -m voltex.main --update 2>/dev/null
-      ;;
-    "Don't ask again")
-      sed -i '/auto_update=true/d' "$config"
-      ;;
-  esac
+    --ok-label="Update" --cancel-label="Skip" 2>/dev/null; then
+    "$PYTHON" -m voltex.main --update 2>/dev/null
+  elif zenity --question --title="VoLtex" --width=350 \
+    --text="Stop checking for updates on launch?" \
+    --ok-label="Yes" --cancel-label="No" 2>/dev/null; then
+    sed -i '/auto_update=true/d' "$config"
+  fi
 }
 
 check_auto_update
