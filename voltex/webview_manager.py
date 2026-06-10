@@ -253,7 +253,7 @@ class WebviewManager:
         try:
             import webview
         except ImportError as exc:
-            raise RuntimeError("pywebview is not installed. Install requirements.txt first.") from exc
+            raise RuntimeError("pywebview is not installed.") from exc
 
         window = webview.create_window("VoLtex", self._config.site_url, width=1280, height=800)
         window.events.loaded += self._inject
@@ -272,7 +272,7 @@ class WebviewManager:
         script = self.build_script()
         evaluator = getattr(window, "evaluate_js", None) or getattr(window, "execute_js", None)
         if evaluator is None:
-            raise RuntimeError("pywebview window does not expose a JavaScript evaluator")
+            raise RuntimeError("pywebview: no JS evaluator available")
         try:
             evaluator(script)
         except Exception as exc:

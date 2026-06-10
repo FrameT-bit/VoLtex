@@ -370,7 +370,6 @@ install_cli_alias() {
 
   mkdir -p "$bin_dir"
 
-  # Remove stale symlink or file if it exists
   if [[ -L "$target" ]] || [[ -e "$target" ]]; then
     rm -f "$target"
   fi

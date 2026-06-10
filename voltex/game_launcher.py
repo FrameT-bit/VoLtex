@@ -16,10 +16,8 @@ from .uri import VortexUri, parse_vortex_uri
 class VortexPlayerNotFound(FileNotFoundError):
     def __init__(self, expected_path: str) -> None:
         super().__init__(
-            "Vortex player was not found in the Wine prefix. "
-            f"Expected: {expected_path}. "
-            "Install the Windows Vortex player in Wine, then try Play again. "
-            "If it is installed in another location, set VOLTEX_EXE to that Vortex.exe path."
+            f"Vortex player not found. Expected: {expected_path}. "
+            "Install the Windows Vortex player in Wine, or set VOLTEX_EXE."
         )
 
 

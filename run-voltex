@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Resolve symlinks so the CLI alias (e.g. ~/.local/bin/voltex) finds the
-# real app directory even when called through a symbolic link.
 if command -v realpath >/dev/null 2>&1; then
   RESOLVED="$(realpath "${BASH_SOURCE[0]}")"
 elif command -v readlink >/dev/null 2>&1 && readlink -f "${BASH_SOURCE[0]}" >/dev/null 2>&1; then
@@ -42,11 +40,11 @@ fail_start() {
 if [[ -x "$APP_DIR/.venv/bin/python" ]]; then
   PYTHON="$APP_DIR/.venv/bin/python"
 else
-  fail_start "VoLtex is not installed correctly. The Python environment was not found at $APP_DIR/.venv. Run: bash \"$APP_DIR/install\""
+  fail_start "VoLtex: Python environment not found at $APP_DIR/.venv\nRun: bash \"$APP_DIR/install\""
 fi
 
 if ! missing="$("$PYTHON" -c 'import importlib.util; missing = [name for name in ("flask", "webview", "keyring") if importlib.util.find_spec(name) is None]; print(", ".join(missing)); raise SystemExit(1 if missing else 0)' 2>/dev/null)"; then
-  fail_start "VoLtex dependencies are missing from $APP_DIR/.venv. Missing modules: ${missing:-unknown}. Run: bash \"$APP_DIR/install\""
+  fail_start "VoLtex: missing dependencies (${missing:-unknown})\nRun: bash \"$APP_DIR/install\""
 fi
 
 cd "$APP_DIR"

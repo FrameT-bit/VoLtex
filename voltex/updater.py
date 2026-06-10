@@ -107,12 +107,12 @@ def apply_update(app_dir: Path, branch: str) -> bool:
 
         inner = _find_repo_root(extract_dir)
         if inner is None:
-            print("Error: could not locate repository root in archive.", file=sys.stderr)
+            print("Error: invalid archive.", file=sys.stderr)
             return False
 
         staging_version_file = inner / "VERSION"
         if not staging_version_file.exists():
-            print("Error: archive does not contain VERSION file.", file=sys.stderr)
+            print("Error: invalid archive.", file=sys.stderr)
             return False
 
         remote_version = fetch_remote_version(branch)
@@ -156,15 +156,15 @@ def apply_update(app_dir: Path, branch: str) -> bool:
 
         _restore_executable_bits(app_dir)
 
-        print(f"VoLtex updated to {staging_version} ({branch}).")
+        print(f"Updated to {staging_version} ({branch}).")
         if backup.exists():
-            print(f"Previous version backed up to {backup}.")
+            print(f"Backup: {backup}.")
     except Exception as exc:
-        print(f"Update failed: {exc}", file=sys.stderr)
+        print(f"Update failed.", file=sys.stderr)
         if backup.exists() and not app_dir.exists():
             try:
                 backup.rename(app_dir)
-                print("Rolled back to previous version.", file=sys.stderr)
+                print("Rolled back.", file=sys.stderr)
             except OSError:
                 pass
         return False
@@ -179,7 +179,7 @@ def apply_update(app_dir: Path, branch: str) -> bool:
 ############################################################
 
 def _download(url: str, dest: Path) -> None:
-    print(f"Downloading {url} ...")
+    print(f"Downloading...")
     with urllib.request.urlopen(url, timeout=120) as resp:
         with dest.open("wb") as fh:
             shutil.copyfileobj(resp, fh)
@@ -190,7 +190,7 @@ def _refresh_pip(venv_path: Path) -> None:
     requirements = venv_path.parent / "requirements.txt"
     if not python.exists() or not requirements.exists():
         return
-    print("Updating Python dependencies...")
+    print("Updating dependencies...")
     try:
         subprocess = __import__("subprocess")
         subprocess.run(
@@ -200,7 +200,7 @@ def _refresh_pip(venv_path: Path) -> None:
             timeout=120,
         )
     except Exception:
-        print("Warning: could not refresh Python dependencies.", file=sys.stderr)
+        print("Warning: pip install failed.", file=sys.stderr)
 
 
 def _find_repo_root(parent: Path) -> Path | None:

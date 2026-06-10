@@ -25,16 +25,12 @@ def _check_dependencies() -> None:
         return
 
     print(
-        "VoLtex dependencies are missing from the Python environment.\n"
-        f"Missing modules: {', '.join(missing)}\n"
+        "VoLtex dependencies are missing.\n"
+        f"Missing: {', '.join(missing)}\n"
         "\n"
-        "Run the installer first:\n"
+        "Run the installer:\n"
         "  ./install\n"
-        "\n"
-        "If the installer is not executable (common after extracting a zip):\n"
-        "  bash install\n"
-        "\n"
-        "The installer creates the Python environment and installs everything needed.",
+        "  bash install\n",
         file=sys.stderr,
     )
     sys.exit(1)
@@ -131,23 +127,23 @@ def run() -> int:
         status = check_update(version, args.update_branch)
 
         if args.check_update:
-            print(f"VoLtex {status.current}  |  branch: {status.branch}")
-            print(f"Latest:  {status.latest}")
+            print(f"VoLtex {status.current} ({status.branch})")
+            print(f"Latest: {status.latest}")
             if status.update_available:
-                print(f"\nUpdate available! Run: voltex --update --update-branch {status.branch}")
+                print(f"\nRun: voltex --update --update-branch {status.branch}")
             else:
-                print("You are up to date.")
+                print("Up to date.")
             return 0 if not status.update_available else 1
 
         if args.update:
             if not status.update_available:
-                print(f"VoLtex {status.current} is already the latest version on {status.branch}.")
+                print(f"Already on latest ({status.branch}).")
                 return 0
 
-            print(f"Updating VoLtex {status.current} → {status.latest} ({status.branch}) ...")
+            print(f"Updating {status.current} → {status.latest} ({status.branch})")
             app_dir = Path(__file__).resolve().parent.parent
             if apply_update(app_dir, args.update_branch):
-                print("Restart VoLtex to use the new version.")
+                print("Restart to apply.")
                 return 0
             return 1
 
