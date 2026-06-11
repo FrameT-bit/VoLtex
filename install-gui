@@ -61,8 +61,9 @@ if echo "$SELECTED" | grep -q "Auto-update on launch"; then ENABLE_AUTO_UPDATE=1
 export VOLTEX_ENABLE_CLI=$ENABLE_CLI
 export VOLTEX_ENABLE_CRASH_REPORTS=$ENABLE_CRASH_REPORTS
 export VOLTEX_ENABLE_AUTO_UPDATE=$ENABLE_AUTO_UPDATE
+export INSTALL_SYSTEM_DEPS=1
 
-bash "$INSTALLER" --install-system-deps 2>&1 | while IFS= read -r line; do
+bash "$INSTALLER" 2>&1 | while IFS= read -r line; do
     echo "# $line"
 done | gui_progress --pulsate --text="Installing VoLtex..." || {
     gui_error "Installation failed.\n\nRun: bash install"

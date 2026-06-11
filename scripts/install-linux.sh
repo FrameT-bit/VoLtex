@@ -172,8 +172,24 @@ install_system_dependencies() {
   fi
 
   if [[ "$INSTALL_SYSTEM_DEPS" != "1" ]]; then
-    print_dependency_help
-    fail "Missing system dependencies. Install them, then rerun ./install. To let VoLtex install them, rerun ./install --install-system-deps."
+    if command -v zenity >/dev/null 2>&1; then
+      if zenity --question --title="VoLtex Setup" --width=400 \
+        --text="VoLtex needs system packages to run.\n\nInstall them now?" \
+        --ok-label="Install" --cancel-label="Cancel" 2>/dev/null; then
+        INSTALL_SYSTEM_DEPS=1
+      fi
+    else
+      printf "VoLtex needs system packages. Install now? [Y/n] "
+      read -r REPLY
+      if [[ "$REPLY" =~ ^[Yy]?$ ]]; then
+        INSTALL_SYSTEM_DEPS=1
+      fi
+    fi
+
+    if [[ "$INSTALL_SYSTEM_DEPS" != "1" ]]; then
+      print_dependency_help
+      fail "Install the packages above, then rerun ./install"
+    fi
   fi
 
   info "Installing missing system dependencies..."
@@ -181,7 +197,8 @@ install_system_dependencies() {
   os_like="$(detect_os_like)"
 
   if command -v dnf >/dev/null 2>&1; then
-    run_as_root dnf install -y python3 python3-pip python3-gobject webkit2gtk4.1 wine xdg-utils desktop-file-utils hicolor-icon-theme || {
+    run_as_root dnf install -y python3 python3-pip python3-gobject webkit2gtk4.1 wine xdg-utils desktop-file-utils hicolor-icon-theme 2>/dev/null || \
+    run_as_root dnf install -y python3 python3-pip python3-gobject webkit2gtk4.0 wine xdg-utils desktop-file-utils hicolor-icon-theme || {
       print_dependency_help
       fail "Automatic dependency install failed."
     }
@@ -321,10 +338,15 @@ install_python_environment() {
   fi
 
   info "Installing Python dependencies..."
-  "$python" -m pip install -r "$INSTALL_DIR/requirements.txt" </dev/null || {
-    print_dependency_help
+  local pip_log
+  pip_log=$(mktemp)
+  if ! "$python" -m pip install -r "$INSTALL_DIR/requirements.txt" >"$pip_log" 2>&1 </dev/null; then
+    warn "pip install failed:"
+    tail -10 "$pip_log" >&2
+    rm -f "$pip_log"
     fail "Python dependency install failed."
-  }
+  fi
+  rm -f "$pip_log"
 
   validate_python_environment "$python"
 }
@@ -397,8 +419,18 @@ install_crash_reports() {
   echo "crash_reports=true" >> "$config_dir/config"
 }
 
+pre_flight_check() {
+  if ! command -v python3 >/dev/null 2>&1; then
+    fail "python3 is not installed. Install it first."
+  fi
+  if ! python3 -c "import venv" 2>/dev/null; then
+    fail "python3-venv is not installed. Install it first."
+  fi
+}
+
 parse_args "$@"
 refuse_root_install
+pre_flight_check
 normalize_install_dir
 install_system_dependencies
 copy_app
