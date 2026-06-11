@@ -84,7 +84,7 @@ check_auto_update() {
   fi
 }
 
-check_auto_update
+check_auto_update || true
 
 cd "$APP_DIR"
 
