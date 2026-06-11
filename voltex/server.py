@@ -12,7 +12,7 @@ from flask import Flask, jsonify, request
 from werkzeug.serving import BaseWSGIServer, make_server
 
 from .auth_manager import AuthManager
-from .game_launcher import GameLauncher, VortexPlayerNotFound, redact_command
+from .game_launcher import GameLauncher, GameAlreadyRunning, VortexPlayerNotFound, redact_command
 
 
 SENSITIVE_FIELDS = {"authorization", "cookie", "password", "session_token", "token"}
@@ -83,6 +83,10 @@ class EventLog:
                     pass
                 with self._log_file.open("a", encoding="utf-8") as handle:
                     handle.write(f"{entry}\n")
+                try:
+                    self._log_file.chmod(0o600)
+                except OSError:
+                    pass
 
     def list(self) -> list[dict[str, Any]]:
         with self._lock:
@@ -149,6 +153,8 @@ def create_app(
 
         try:
             result = launcher.launch(uri, on_exit=lambda proc: event_log.push("game_exit", code=proc.returncode))
+        except GameAlreadyRunning:
+            return secure_json({"error": "A game is already running", "kind": "already_running"}, 409)
         except VortexPlayerNotFound as exc:
             event_log.push("launch_error", kind="missing_player", detail=str(exc))
             return secure_json({"error": str(exc), "kind": "missing_player"}, 500)

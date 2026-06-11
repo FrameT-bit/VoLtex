@@ -21,6 +21,10 @@ class VortexPlayerNotFound(FileNotFoundError):
         )
 
 
+class GameAlreadyRunning(Exception):
+    pass
+
+
 @dataclass(frozen=True)
 class LaunchResult:
     pid: int
@@ -117,6 +121,10 @@ class GameLauncher:
         return command
 
     def launch(self, uri: str, on_exit: ProcessCallback | None = None) -> LaunchResult:
+        running = self.current_process()
+        if running is not None and running.poll() is None:
+            raise GameAlreadyRunning
+
         vortex_exe = find_vortex_executable(self._config)
         if vortex_exe is None:
             raise VortexPlayerNotFound(str(self._config.vortex_exe))

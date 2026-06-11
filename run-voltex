@@ -17,6 +17,8 @@ export GDK_BACKEND="${VOLTEX_GDK_BACKEND:-x11}"
 
 mkdir -p "$LOG_DIR"
 chmod 700 "$LOG_DIR" 2>/dev/null || true
+touch "$LOG_FILE"
+chmod 600 "$LOG_FILE" 2>/dev/null || true
 
 show_error() {
   local message="$1"
