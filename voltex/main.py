@@ -150,6 +150,10 @@ def run() -> int:
     auth = AuthManager(config)
     launcher = GameLauncher(config)
 
+    if args.uri and args.uri == "help":
+        build_parser().print_help()
+        return 0
+
     if args.uri:
         launcher.launch(args.uri)
         return 0
